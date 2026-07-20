@@ -1,11 +1,3 @@
-// src/views/ViewAsistente.jsx
-// ---------------------------------------------------------------------------
-// Panel del "estudiante asistente" en dos tiempos:
-//   Tiempo 1: acceso seccional (grado + contraseña) validado contra la API.
-//   Tiempo 2: panel vivo — genera el OTP diario y escucha en tiempo real
-//             (onValue) la lista de asistencia, con botones para forzar
-//             manualmente P/A/M ante fallos de conexión del alumno.
-// ---------------------------------------------------------------------------
 import React, { useState, useEffect, useCallback } from 'react';
 import { llamarApi } from '../api';
 import { escucharRuta } from '../firebase';
@@ -14,8 +6,7 @@ import { Spinner, AlertaError, CampoError } from '../components/EstadoPeticion';
 import CampoClave from '../components/CampoClave';
 import GeneradorOtp from '../components/GeneradorOtp';
 import BotonGuardarAsistencia from '../components/BotonGuardarAsistencia';
-
-const GRADOS = ['1° GENERAL "B" ', '2° GENERAL "C" ', '2° GENERAL "D" ', '1° DISEÑO GRÁFICO "A" ', '3° LOGISTICA Y ADUANAS "A" '];
+import { useSecciones } from '../hooks/useSecciones';
 
 function hoyISO() {
   const d = new Date();
@@ -26,16 +17,14 @@ function hoyISO() {
 }
 
 export default function ViewAsistente() {
-  const [sesion, setSesion] = useState(null); // { grado, clave, nombre }
+  const [sesion, setSesion] = useState(null);
+  const { secciones } = useSecciones();
 
-  if (!sesion) return <AccesoSeccional onIngresar={setSesion} />;
+  if (!sesion) return <AccesoSeccional onIngresar={setSesion} secciones={secciones} />;
   return <PanelVivo grado={sesion.grado} clave={sesion.clave} nombre={sesion.nombre} onSalir={() => setSesion(null)} />;
 }
 
-// ---------------------------------------------------------------------------
-// TIEMPO 1: Acceso seccional
-// ---------------------------------------------------------------------------
-function AccesoSeccional({ onIngresar }) {
+function AccesoSeccional({ onIngresar, secciones }) {
   const [grado, setGrado] = useState('');
   const [clave, setClave] = useState('');
   const [nombre, setNombre] = useState('');
@@ -81,7 +70,7 @@ function AccesoSeccional({ onIngresar }) {
             className={campoClase(errorGrado)}
           >
             <option value="">Seleccione...</option>
-            {GRADOS.map((g) => <option key={g} value={g}>{g}</option>)}
+            {secciones.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
           </select>
           <CampoError mensaje={errorGrado} />
         </div>
@@ -115,25 +104,20 @@ function AccesoSeccional({ onIngresar }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// TIEMPO 2: Panel vivo (OTP + grilla reactiva + auditoría manual)
-// ---------------------------------------------------------------------------
 function PanelVivo({ grado, clave, nombre, onSalir }) {
   const [alumnos, setAlumnos] = useState([]);
   const [asistencia, setAsistencia] = useState({});
-  const [motivoModal, setMotivoModal] = useState(null); // nie pendiente de motivo
+  const [motivoModal, setMotivoModal] = useState(null);
   const [motivoTexto, setMotivoTexto] = useState('');
   const [errorAuditoria, setErrorAuditoria] = useState('');
 
   const fecha = hoyISO();
 
-  // Escucha en tiempo real de la asistencia del día para este grado.
   useEffect(() => {
     const cancelar = escucharRuta(`asistencia/${fecha}/${grado}`, (data) => setAsistencia(data || {}));
     return cancelar;
   }, [fecha, grado]);
 
-  // Escucha en tiempo real de la lista de alumnos del grado.
   useEffect(() => {
     const cancelar = escucharRuta(`estudiantes/${grado}`, (data) => {
       const lista = Object.values(data || {}).sort((a, b) => a.apellidos.localeCompare(b.apellidos));
@@ -150,9 +134,6 @@ function PanelVivo({ grado, clave, nombre, onSalir }) {
     setErrorAuditoria('');
     const anterior = asistencia[nie];
 
-    // Actualización optimista: refleja el cambio de inmediato en la tabla,
-    // en vez de esperar el viaje redondo por Apps Script + Firebase antes
-    // de mostrar algo (eso era lo que se sentía trabado).
     setAsistencia((prev) => ({
       ...prev,
       [nie]: { estado, motivo, origen: 'manual', validadoPor: nombre, hora: new Date().toISOString() },
@@ -161,7 +142,6 @@ function PanelVivo({ grado, clave, nombre, onSalir }) {
     const resultado = await llamarApi('auditarManual', { nie, grado, estado, motivo, clave, validadoPor: nombre });
     if (!resultado.ok) {
       setErrorAuditoria(resultado.error || 'No se pudo actualizar el estado.');
-      // Revertir el cambio optimista si el servidor lo rechazó.
       setAsistencia((prev) => ({ ...prev, [nie]: anterior }));
     }
   }, [grado, clave, nombre, asistencia]);

@@ -1,9 +1,3 @@
-// src/views/ViewLanding.jsx
-// ---------------------------------------------------------------------------
-// Pantalla de bienvenida (Landing) con acceso a las dos áreas principales 
-// de la aplicación (Estudiantes / Maestro-Admin) y créditos de desarrollo.
-// ---------------------------------------------------------------------------
-
 import React from 'react';
 import logo from '../assets/logo.png';
 
@@ -54,7 +48,6 @@ export default function ViewLanding({ onNavegar }) {
         </div>
       </div>
 
-      {/* -------------------- CRÉDITOS / PIE DE PÁGINA -------------------- */}
       <footer className="pt-6 border-t border-slate-800/60">
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">
           Desarrollado por <span className="text-indigo-400 font-black">AE Preza Group</span>

@@ -1,10 +1,3 @@
-// src/utils/validators.js
-// ---------------------------------------------------------------------------
-// Validaciones dinámicas reutilizables por los formularios controlados.
-// Cada validador retorna '' si el valor es válido, o un mensaje de error
-// listo para mostrarse debajo del input mientras el usuario escribe.
-// ---------------------------------------------------------------------------
-
 export function validarNie(valor) {
   if (!valor) return 'El NIE es requerido.';
   if (!/^[0-9]+$/.test(valor)) return 'El NIE solo debe contener números.';

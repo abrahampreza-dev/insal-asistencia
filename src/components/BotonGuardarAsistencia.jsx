@@ -1,30 +1,10 @@
-// src/components/BotonGuardarAsistencia.jsx
-// ---------------------------------------------------------------------------
-// Cierra la asistencia del día para un grado (acción "congelarReporte" en el
-// backend). A partir de aquí el código OTP deja de servir para auto-marcar,
-// y ya no se pueden hacer más correcciones manuales de ese día. Lo puede
-// ejecutar el asistente (con su clave seccional) o el maestro/admin (con
-// claveAdmin) — quien sea que esté tomando la asistencia ese día.
-// ---------------------------------------------------------------------------
 import React, { useState } from 'react';
 import { llamarApi } from '../api';
 import { Spinner, AlertaError, TarjetaExito } from './EstadoPeticion';
 
-/**
- * @param {string} grado
- * @param {{clave?: string, claveAdmin?: string, cerradoPor?: string}} auth
- */
-/**
- * @param {string} grado
- * @param {{clave?: string, claveAdmin?: string, cerradoPor?: string}} auth
- * @param {string[]} [pendientes] - nombres de alumnos sin marcar todavía;
- *   si tiene elementos, el botón se deshabilita y muestra el aviso en vez
- *   de intentar guardar (la validación real y definitiva vive igual en el
- *   backend, esto solo evita el intento innecesario).
- */
 export default function BotonGuardarAsistencia({ grado, auth, pendientes = [] }) {
   const [cargando, setCargando] = useState(false);
-  const [estado, setEstado] = useState('idle'); // idle | exito | error
+  const [estado, setEstado] = useState('idle');
   const [mensaje, setMensaje] = useState('');
   const [confirmar, setConfirmar] = useState(false);
 

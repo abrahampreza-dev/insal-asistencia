@@ -1,9 +1,3 @@
-// src/components/CampoClave.jsx
-// ---------------------------------------------------------------------------
-// Input de contraseña reutilizable con botón de "ojito" para mostrar/ocultar
-// el texto en claro. Se usa en el login de administrador, el login del
-// asistente, y al asignar/consultar la clave seccional.
-// ---------------------------------------------------------------------------
 import React, { useState } from 'react';
 
 export default function CampoClave({ value, onChange, placeholder, onKeyDown, className = '', autoFocus = false }) {

@@ -1,17 +1,11 @@
-
-// Formulario controlado de registro de alumnos. Valida en tiempo real cada
-// campo mientras el usuario escribe, comprime la foto vía Canvas antes de
-// enviarla, y maneja estados de carga/éxito/error en la petición a la API.
-
 import React, { useState, useRef } from 'react';
 import { llamarApi } from '../api';
 import { comprimirFoto } from '../utils/comprimirFoto';
 import { validarNie, validarTexto, validarEmail, validarFecha, validarSeleccion } from '../utils/validators';
 import { Spinner, TarjetaExito, AlertaError, CampoError } from '../components/EstadoPeticion';
 import ModalCamara from '../components/ModalCamara';
+import { useSecciones } from '../hooks/useSecciones';
 import logo from '../assets/logo.png';
-
-const GRADOS = ['1° GENERAL "B" ', '2° GENERAL "C" ', '2° GENERAL "D" ', '1° DISEÑO GRÁFICO "A" ', '3° LOGISTICA Y ADUANAS "A" '];
 
 const CAMPOS_INICIALES = {
   nie: '', apellidos: '', nombres: '', grado: '', sexo: '',
@@ -26,12 +20,13 @@ const CAMPOS_INICIALES = {
  *   trajo al alumno hasta aquí (p.ej. continuar a marcar asistencia).
  */
 export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '', onExito = null }) {
+  const { secciones } = useSecciones();
   const [campos, setCampos] = useState({ ...CAMPOS_INICIALES, nie: nieInicial, grado: gradoInicial });
   const [errores, setErrores] = useState({});
   const [tocado, setTocado] = useState({});
   const [foto, setFoto] = useState(null);
   const [errorFoto, setErrorFoto] = useState('');
-  const [estado, setEstado] = useState('idle'); // idle | cargando | exito | error
+  const [estado, setEstado] = useState('idle');
   const [mensajeError, setMensajeError] = useState('');
   const [alumnoRegistrado, setAlumnoRegistrado] = useState(null);
   const [mostrarCamara, setMostrarCamara] = useState(false);
@@ -176,7 +171,6 @@ export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '',
             </button>
           </div>
 
-          {/* Galería / archivos, sin forzar la cámara */}
           <input ref={inputGaleriaRef} type="file" accept="image/*" onChange={manejarFoto} className="hidden" />
 
           <CampoError mensaje={errorFoto} />
@@ -204,7 +198,7 @@ export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '',
               className={campoClase(tocado.grado && errores.grado)}
             >
               <option value="">Seleccione...</option>
-              {GRADOS.map((g) => <option key={g} value={g}>{g}</option>)}
+              {secciones.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
             </select>
             <CampoError mensaje={tocado.grado && errores.grado} />
           </div>
@@ -245,9 +239,6 @@ export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '',
   );
 }
 
-// ---------------------------------------------------------------------------
-// Sub-componentes de campo reutilizables
-// ---------------------------------------------------------------------------
 function campoClase(tieneError) {
   return `w-full p-4 bg-slate-800 rounded-xl border font-bold italic text-sm outline-none transition focus:ring-2 ${
     tieneError ? 'border-rose-300 focus:ring-rose-400' : 'border-transparent focus:ring-indigo-500'

@@ -1,18 +1,13 @@
-// Punto único de "Marcación" para el área de estudiantes. Dos tiempos:
-//   Tiempo 1: el alumno indica su grado y NIE.
-//   Tiempo 2: confirmación visual (foto + nombre) + código OTP del día →
-//     pantalla verde de éxito absoluto.
-
 import React, { useState } from 'react';
 import { llamarApi } from '../api';
 import { validarNie, validarSeleccion, validarOtp } from '../utils/validators';
 import { Spinner, AlertaError, CampoError } from '../components/EstadoPeticion';
 import ViewRegistroAlumno from './ViewRegistroAlumno';
-
-const GRADOS = ['1° GENERAL "B" ', '2° GENERAL "C" ', '2° GENERAL "D" ', '1° DISEÑO GRÁFICO "A" ', '3° LOGISTICA Y ADUANAS "A" '];
+import { useSecciones } from '../hooks/useSecciones';
 
 export default function ViewMarcacion() {
-  const [paso, setPaso] = useState('nie'); // nie | no-encontrado | registro | confirmar-otp | exito
+  const { secciones } = useSecciones();
+  const [paso, setPaso] = useState('nie');
   const [grado, setGrado] = useState('');
   const [nie, setNie] = useState('');
   const [otp, setOtp] = useState('');
@@ -41,7 +36,6 @@ export default function ViewMarcacion() {
       setAlumno(resultado.data);
       setPaso('confirmar-otp');
     } else {
-      // No inscrito (o NIE no encontrado en ese grado): ofrecer registro.
       setPaso('no-encontrado');
     }
   }
@@ -75,7 +69,6 @@ export default function ViewMarcacion() {
     setPaso('confirmar-otp');
   }
 
-  // -------------------- Tiempo 2, paso final: éxito --------------------
   if (paso === 'exito') {
     return (
       <div className="max-w-sm mx-auto text-center bg-emerald-500 text-white p-12 rounded-[3rem] shadow-2xl">
@@ -94,7 +87,6 @@ export default function ViewMarcacion() {
     );
   }
 
-  // -------------------- Tiempo 1, alterno: no inscrito → registro --------------------
   if (paso === 'no-encontrado') {
     return (
       <div className="max-w-sm mx-auto bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-sm text-center">
@@ -116,12 +108,10 @@ export default function ViewMarcacion() {
     );
   }
 
-  // -------------------- Tiempo 1, alterno: formulario de registro --------------------
   if (paso === 'registro') {
     return <ViewRegistroAlumno nieInicial={nie} gradoInicial={grado} onExito={continuarTrasRegistro} />;
   }
 
-  // -------------------- Tiempo 1 y Tiempo 2 (confirmación + OTP) --------------------
   return (
     <div className="max-w-sm mx-auto bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-sm">
       <h3 className="text-center text-xs font-black uppercase text-indigo-400 italic tracking-widest mb-8">
@@ -138,7 +128,7 @@ export default function ViewMarcacion() {
               className={campoClase(errorGrado)}
             >
               <option value="">Seleccione...</option>
-              {GRADOS.map((g) => <option key={g} value={g}>{g}</option>)}
+              {secciones.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
             </select>
             <CampoError mensaje={errorGrado} />
           </div>

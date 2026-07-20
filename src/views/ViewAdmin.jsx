@@ -1,12 +1,3 @@
-
-// Área Maestro/Administrador. Protegida por clave global. Contiene:
-//   - Reportes: analítica por género, exportación CSV, texto para WhatsApp.
-//   - Alumnos: corregir nombre/datos, mover de sección o eliminar un alumno.
-//   - Claves: asignar/renovar la contraseña seccional del asistente.
-//   - Corrección: forzar manualmente P/A/M en la grilla en vivo de un grado.
-
-
-
 import React, { useState, useEffect } from 'react';
 import { llamarApi } from '../api';
 import { escucharRuta, leerRuta } from '../firebase';
@@ -15,13 +6,13 @@ import { Spinner, AlertaError, TarjetaExito, CampoError } from '../components/Es
 import CampoClave from '../components/CampoClave';
 import GeneradorOtp from '../components/GeneradorOtp';
 import BotonGuardarAsistencia from '../components/BotonGuardarAsistencia';
-
-const GRADOS = ['1° GENERAL "B" ', '2° GENERAL "C" ', '2° GENERAL "D" ', '1° DISEÑO GRÁFICO "A" ', '3° LOGISTICA Y ADUANAS "A" '];
+import { useSecciones } from '../hooks/useSecciones';
 
 const TABS = [
   { id: 'reportes', texto: 'Reportes' },
   { id: 'alumnos', texto: 'Alumnos' },
   { id: 'claves', texto: 'Claves' },
+  { id: 'secciones', texto: 'Secciones' },
   { id: 'asistencia', texto: 'Pasar Lista' },
 ];
 
@@ -31,6 +22,7 @@ export default function ViewAdmin() {
   const [cargandoLogin, setCargandoLogin] = useState(false);
   const [errorLogin, setErrorLogin] = useState('');
   const [pestaña, setPestaña] = useState('reportes');
+  const { secciones } = useSecciones();
 
   async function entrar() {
     if (!clave.trim()) { setErrorLogin('Ingresa la clave de administrador.'); return; }
@@ -80,10 +72,11 @@ export default function ViewAdmin() {
         ))}
       </div>
 
-      {pestaña === 'reportes' && <PanelReportes claveAdmin={clave} />}
-      {pestaña === 'alumnos' && <PanelAlumnos claveAdmin={clave} />}
-      {pestaña === 'claves' && <PanelClaves claveAdmin={clave} />}
-      {pestaña === 'asistencia' && <PanelCorreccion claveAdmin={clave} />}
+      {pestaña === 'reportes' && <PanelReportes claveAdmin={clave} secciones={secciones} />}
+      {pestaña === 'alumnos' && <PanelAlumnos claveAdmin={clave} secciones={secciones} />}
+      {pestaña === 'claves' && <PanelClaves claveAdmin={clave} secciones={secciones} />}
+      {pestaña === 'secciones' && <PanelSecciones claveAdmin={clave} />}
+      {pestaña === 'asistencia' && <PanelCorreccion claveAdmin={clave} secciones={secciones} />}
     </div>
   );
 }
@@ -101,10 +94,7 @@ function BotonPestaña({ activo, onClick, texto }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// REPORTES: analítica + CSV + WhatsApp + congelar
-// ---------------------------------------------------------------------------
-function PanelReportes({ claveAdmin }) {
+function PanelReportes({ claveAdmin, secciones }) {
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
   const [grado, setGrado] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -125,8 +115,6 @@ function PanelReportes({ claveAdmin }) {
     setMensajeCongelar('');
     setMensajeCorreos('');
 
-    // Lectura puntual (no listener) — es un reporte de un instante, no algo
-    // que necesite mantenerse suscrito en vivo.
     const [dataAlumnos, dataAsistencia] = await Promise.all([
       leerRuta(`estudiantes/${grado}`),
       leerRuta(`asistencia/${fecha}/${grado}`),
@@ -151,8 +139,6 @@ function PanelReportes({ claveAdmin }) {
 
   function descargarCsv() {
     if (!reporte) return;
-    // Mismo formato que el sistema anterior: separador ";", BOM para Excel,
-    // y estado en texto largo (PRESENTE/FALTA/PERMISO/SIN REGISTRO).
     let csv = '\uFEFFNIE;Apellidos;Nombres;Estado;Hora;Motivo\n';
     reporte.alumnos.forEach((al) => {
       const r = reporte.asistencia[al.nie];
@@ -210,7 +196,7 @@ function PanelReportes({ claveAdmin }) {
     <div className="space-y-6">
       <div className="bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-sm flex flex-wrap gap-4 items-end">
         <Campo texto="Fecha" tipo="date" value={fecha} onChange={setFecha} />
-        <CampoSelect texto="Grado" value={grado} onChange={setGrado} opciones={GRADOS} />
+        <CampoSelect texto="Grado" value={grado} onChange={setGrado} opciones={secciones} />
         <button onClick={consultar} disabled={cargando}
           className="bg-indigo-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700 disabled:opacity-50 transition">
           Consultar
@@ -258,10 +244,7 @@ function PanelReportes({ claveAdmin }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// ALUMNOS: corregir nombre/datos, mover de sección, eliminar
-// ---------------------------------------------------------------------------
-function PanelAlumnos({ claveAdmin }) {
+function PanelAlumnos({ claveAdmin, secciones }) {
   const [grado, setGrado] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [alumnos, setAlumnos] = useState([]);
@@ -332,7 +315,7 @@ function PanelAlumnos({ claveAdmin }) {
   return (
     <div className="space-y-6">
       <div className="bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-sm flex flex-wrap gap-4 items-end">
-        <CampoSelect texto="Grado" value={grado} onChange={cargarGrado} opciones={GRADOS} />
+        <CampoSelect texto="Grado" value={grado} onChange={cargarGrado} opciones={secciones} />
         <div className="flex-1 min-w-[200px]">
           <Etiqueta texto="Buscar por NIE o apellido" />
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
@@ -369,7 +352,7 @@ function PanelAlumnos({ claveAdmin }) {
             <Etiqueta texto="Mover de sección (opcional)" />
             <select value={campos.grado} onChange={(e) => setCampos({ ...campos, grado: e.target.value })}
               className="w-full p-3 bg-slate-800 rounded-xl border-none font-bold italic outline-none focus:ring-2 focus:ring-indigo-500">
-              {GRADOS.map((g) => <option key={g} value={g}>{g}</option>)}
+              {secciones.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
             </select>
           </div>
 
@@ -409,12 +392,9 @@ function PanelAlumnos({ claveAdmin }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// CLAVES: asignar/renovar la contraseña seccional del asistente
-// ---------------------------------------------------------------------------
-function PanelClaves({ claveAdmin }) {
+function PanelClaves({ claveAdmin, secciones }) {
   const [grado, setGrado] = useState('');
-  const [claveActual, setClaveActual] = useState(null); // null = aún no consultada, '' = sin clave asignada
+  const [claveActual, setClaveActual] = useState(null);
   const [verClaveActual, setVerClaveActual] = useState(false);
   const [claveNueva, setClaveNueva] = useState('');
   const [errorClave, setErrorClave] = useState('');
@@ -459,7 +439,7 @@ function PanelClaves({ claveAdmin }) {
       </h3>
 
       <div className="mb-6">
-        <CampoSelect texto="Grado" value={grado} onChange={seleccionarGrado} opciones={GRADOS} />
+        <CampoSelect texto="Grado" value={grado} onChange={seleccionarGrado} opciones={secciones} />
       </div>
 
       {grado && (
@@ -509,11 +489,7 @@ function PanelClaves({ claveAdmin }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// CORRECCIÓN: grilla en vivo del grado, forzar P/A/M sin necesitar la clave
-// seccional (usa la clave de administrador ya validada en este panel).
-// ---------------------------------------------------------------------------
-function PanelCorreccion({ claveAdmin }) {
+function PanelCorreccion({ claveAdmin, secciones }) {
   const [grado, setGrado] = useState('');
   const [nombreValidador, setNombreValidador] = useState('');
   const [alumnos, setAlumnos] = useState([]);
@@ -577,7 +553,7 @@ function PanelCorreccion({ claveAdmin }) {
     <div className="space-y-6">
       <div className="bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-sm flex flex-wrap gap-6 items-end justify-between">
         <div className="flex flex-wrap gap-4 items-end">
-          <CampoSelect texto="Grado" value={grado} onChange={setGrado} opciones={GRADOS} />
+        <CampoSelect texto="Grado" value={grado} onChange={setGrado} opciones={secciones} />
           <div>
             <Etiqueta texto="Tu nombre (quien corrige hoy)" />
             <input
@@ -669,9 +645,122 @@ function PanelCorreccion({ claveAdmin }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Sub-componentes de campo reutilizables
-// ---------------------------------------------------------------------------
+function PanelSecciones({ claveAdmin }) {
+  const [secciones, setSecciones] = useState({});
+  const [cargando, setCargando] = useState(true);
+  const [nuevaId, setNuevaId] = useState('');
+  const [nuevoLabel, setNuevoLabel] = useState('');
+  const [error, setError] = useState('');
+  const [estado, setEstado] = useState('idle');
+  const [mensaje, setMensaje] = useState('');
+  const [confirmarEliminar, setConfirmarEliminar] = useState(null);
+
+  useEffect(() => {
+    const cancelar = escucharRuta('config/secciones', (data) => {
+      setSecciones(data || {});
+      setCargando(false);
+    });
+    return cancelar;
+  }, []);
+
+  async function crear() {
+    const idLimpio = nuevaId.trim().toUpperCase();
+    const labelLimpio = nuevoLabel.trim().toUpperCase();
+    if (!idLimpio) { setError('El ID es requerido.'); return; }
+    if (!labelLimpio) { setError('El nombre es requerido.'); return; }
+    if (idLimpio.length > 10) { setError('El ID no debe tener más de 10 caracteres.'); return; }
+    if (!/^[A-Za-z0-9]+$/.test(idLimpio)) { setError('El ID solo puede contener letras y números.'); return; }
+    if (secciones[idLimpio]) { setError('Ya existe una sección con ese ID.'); return; }
+
+    setError('');
+    setEstado('cargando');
+    const resultado = await llamarApi('crearSeccion', { id: idLimpio, label: labelLimpio, claveAdmin });
+    setEstado('idle');
+    if (resultado.ok) {
+      setMensaje(resultado.mensaje);
+      setNuevaId('');
+      setNuevoLabel('');
+    } else {
+      setError(resultado.error);
+    }
+  }
+
+  async function eliminar(id) {
+    setEstado('cargando');
+    const resultado = await llamarApi('eliminarSeccion', { id, claveAdmin });
+    setEstado('idle');
+    setConfirmarEliminar(null);
+    if (resultado.ok) {
+      setMensaje(resultado.mensaje);
+    } else {
+      setError(resultado.error);
+    }
+  }
+
+  const lista = Object.entries(secciones).map(([id, label]) => ({ id, label }));
+
+  return (
+    <div className="max-w-sm mx-auto bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-sm space-y-6">
+      <h3 className="text-center text-xs font-black uppercase text-indigo-400 italic tracking-widest">
+        Gestionar Secciones
+      </h3>
+
+      <div>
+        <Etiqueta texto="Secciones actuales" />
+        {cargando ? (
+          <Spinner texto="Cargando..." />
+        ) : lista.length === 0 ? (
+          <p className="text-[10px] font-bold italic text-amber-400 bg-amber-500/10 rounded-xl p-3">
+            No hay secciones. Crea la primera arriba.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {lista.map((s) => (
+              <div key={s.id} className="flex items-center justify-between bg-slate-800 rounded-xl p-3">
+                <div>
+                  <span className="font-black italic text-sm text-slate-100">{s.id}</span>
+                  <span className="text-[9px] text-slate-400 font-bold italic ml-2">{s.label}</span>
+                </div>
+                {confirmarEliminar === s.id ? (
+                  <div className="flex gap-2">
+                    <button onClick={() => setConfirmarEliminar(null)} className="text-[9px] font-bold text-slate-400 uppercase">No</button>
+                    <button onClick={() => eliminar(s.id)} disabled={estado === 'cargando'}
+                      className="text-[9px] font-bold text-rose-400 uppercase disabled:opacity-50">
+                      {estado === 'cargando' ? '...' : 'Sí, eliminar'}
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => setConfirmarEliminar(s.id)}
+                    className="text-[9px] font-black uppercase text-rose-400 tracking-widest hover:text-rose-300 transition">
+                    <i className="fas fa-trash" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-slate-800 pt-4">
+        <Etiqueta texto="Crear nueva sección" />
+        <input value={nuevaId} onChange={(e) => setNuevaId(e.target.value)}
+          placeholder="ID (ej. 4GB)" maxLength={10}
+          className="w-full p-3 bg-slate-800 rounded-xl border-none font-bold italic uppercase outline-none focus:ring-2 focus:ring-indigo-500 mb-2" />
+        <input value={nuevoLabel} onChange={(e) => setNuevoLabel(e.target.value)}
+          placeholder="Nombre (ej. 4 GENERAL B)"
+          className="w-full p-3 bg-slate-800 rounded-xl border-none font-bold italic uppercase outline-none focus:ring-2 focus:ring-indigo-500 mb-2" />
+        <button onClick={crear} disabled={estado === 'cargando'}
+          className="w-full bg-indigo-600 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700 disabled:opacity-50 transition">
+          {estado === 'cargando' ? 'Creando...' : 'Crear Sección'}
+        </button>
+      </div>
+
+      {error && <AlertaError mensaje={error} />}
+      {mensaje && <p className="text-[10px] italic font-bold text-emerald-400 text-center">{mensaje}</p>}
+    </div>
+  );
+}
+
 function Etiqueta({ texto }) {
   return <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest italic block mb-1 ml-1">{texto}</label>;
 }
@@ -693,7 +782,7 @@ function CampoSelect({ texto, value, onChange, opciones }) {
       <select value={value} onChange={(e) => onChange(e.target.value)}
         className="p-3 bg-slate-800 rounded-xl border-none font-bold italic outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="">Seleccione...</option>
-        {opciones.map((o) => <option key={o} value={o}>{o}</option>)}
+        {opciones.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
       </select>
     </div>
   );

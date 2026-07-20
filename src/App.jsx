@@ -1,8 +1,3 @@
-// Router / navegación central en dos tiempos:
-//   Nivel 1: Inicio | Área Estudiantes | Área Maestro/Administrador
-//   Nivel 2 (solo dentro de Área Estudiantes): Registro | Marcación | Asistente
-// El Área Maestro/Administrador vive protegida detrás de su propia clave
-
 import React, { useState } from 'react';
 import logo from './assets/logo.png';
 import ViewLanding from './views/ViewLanding';
@@ -59,7 +54,6 @@ export default function App() {
           ))}
         </nav>
 
-        {/* Nivel 2: solo visible dentro del Área Estudiantes */}
         {area === 'estudiante' && (
           <nav className="flex lg:flex-col gap-1 lg:mt-6 lg:pt-6 lg:border-t border-slate-800 overflow-x-auto lg:overflow-visible">
             {SUBNAV_ESTUDIANTE.map((s) => (

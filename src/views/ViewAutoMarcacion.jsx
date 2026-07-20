@@ -1,21 +1,12 @@
-// src/views/ViewAutoMarcacion.jsx
-// ---------------------------------------------------------------------------
-// Flujo de auto-marcación del estudiante en 3 pasos, con renderizado
-// condicional estricto en cada transición:
-//   1) Captura y valida el NIE. Si no existe, ofrece registrarse (Rúbrica).
-//   2) Si el NIE es válido, muestra tarjeta con foto + nombre y habilita OTP.
-//   3) Envía el OTP; en éxito desmonta la vista y muestra confirmación verde.
-// ---------------------------------------------------------------------------
 import React, { useState } from 'react';
 import { llamarApi } from '../api';
 import { validarNie, validarSeleccion, validarOtp } from '../utils/validators';
 import { Spinner, AlertaError, CampoError } from '../components/EstadoPeticion';
-
-// Ajustamos los nombres exactos para que coincidan con tu catálogo de base de datos
-const GRADOS = ['1° GENERAL "B" ', '2° GENERAL "C" ', '2° GENERAL "D" ', '1° DISEÑO GRÁFICO "A" ', '3° LOGISTICA Y ADUANAS "A" '];
+import { useSecciones } from '../hooks/useSecciones';
 
 export default function ViewAutoMarcacion({ onNavegar }) {
-  const [paso, setPaso] = useState(1); // 1: NIE | 2: confirmación + OTP | 3: éxito
+  const { secciones } = useSecciones();
+  const [paso, setPaso] = useState(1);
   const [grado, setGrado] = useState('');
   const [nie, setNie] = useState('');
   const [otp, setOtp] = useState('');
@@ -26,7 +17,7 @@ export default function ViewAutoMarcacion({ onNavegar }) {
   const [cargandoNie, setCargandoNie] = useState(false);
   const [cargandoOtp, setCargandoOtp] = useState(false);
   const [errorPeticion, setErrorPeticion] = useState('');
-  const [noInscrito, setNoInscrito] = useState(false); // Estado condicional de la tarea
+  const [noInscrito, setNoInscrito] = useState(false);
 
   async function manejarBuscarNie(e) {
     e.preventDefault();
@@ -40,7 +31,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
     setErrorPeticion('');
     setNoInscrito(false);
 
-    // Corregimos el payload para que viaje plano y sea compatible con verificarNie(body) de tu Apps Script
     const resultado = await llamarApi('verificarNie', { nie, grado });
     setCargandoNie(false);
 
@@ -49,7 +39,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
       setPaso(2);
     } else {
       setErrorPeticion(resultado.error || 'No se pudo verificar el NIE.');
-      // Si el servidor avisa que no se encontró el alumno, activamos la bandera de contingencia
       if (resultado.error && resultado.error.includes('No se encontró')) {
         setNoInscrito(true);
       }
@@ -65,7 +54,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
     setCargandoOtp(true);
     setErrorPeticion('');
 
-    // Corregimos para que viaje el payload plano tal y como lo extrae el backend en marcarAlumno
     const resultado = await llamarApi('marcarAlumno', { nie, grado, otp });
     setCargandoOtp(false);
 
@@ -82,7 +70,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
     setAlumno(null); setErrorPeticion(''); setNoInscrito(false);
   }
 
-  // -------------------- PASO 3: confirmación absoluta --------------------
   if (paso === 3) {
     return (
       <div className="max-w-sm mx-auto text-center bg-emerald-500 text-white p-12 rounded-[3rem] shadow-2xl animate-fadeIn">
@@ -107,7 +94,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
         Auto-Marcación
       </h3>
 
-      {/* -------------------- PASO 1: NIE -------------------- */}
       {paso === 1 && (
         <form onSubmit={manejarBuscarNie} className="space-y-5">
           <div>
@@ -118,7 +104,7 @@ export default function ViewAutoMarcacion({ onNavegar }) {
               className={campoClase(errorGrado)}
             >
               <option value="">Seleccione...</option>
-              {GRADOS.map((g) => <option key={g} value={g}>{g}</option>)}
+              {secciones.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
             </select>
             <CampoError mensaje={errorGrado} />
           </div>
@@ -137,8 +123,7 @@ export default function ViewAutoMarcacion({ onNavegar }) {
           </div>
 
           {cargandoNie && <Spinner texto="Buscando alumno..." />}
-          
-          {/* Renderizado Condicional de la Rúbrica: Si no está inscrito, se le muestra la opción de ir al registro */}
+
           {noInscrito ? (
             <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-center">
               <p className="text-[11px] text-rose-600 font-bold italic mb-3">Tu NIE no aparece registrado en esta sección.</p>
@@ -164,7 +149,6 @@ export default function ViewAutoMarcacion({ onNavegar }) {
         </form>
       )}
 
-      {/* -------------------- PASO 2: confirmación + OTP -------------------- */}
       {paso === 2 && alumno && (
         <div className="space-y-5 animate-fadeIn">
           <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">

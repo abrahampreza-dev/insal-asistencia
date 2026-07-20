@@ -1,17 +1,6 @@
-// src/components/ModalCamara.jsx
-// ---------------------------------------------------------------------------
-// Modal de cámara en vivo usando navigator.mediaDevices.getUserMedia. Se usa
-// en vez del atributo `capture` de <input type="file">, porque los
-// navegadores de escritorio lo ignoran y abren el explorador de archivos en
-// su lugar — esto sí abre la cámara real tanto en celular como en laptop.
-// ---------------------------------------------------------------------------
 import React, { useRef, useEffect, useState } from 'react';
 import { comprimirFotoDesdeVideo } from '../utils/comprimirFoto';
 
-/**
- * @param {() => void} onCerrar
- * @param {(dataUrl: string) => void} onCapturar - recibe el dataURL ya comprimido
- */
 export default function ModalCamara({ onCerrar, onCapturar }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);

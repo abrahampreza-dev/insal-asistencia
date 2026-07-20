@@ -1,8 +1,3 @@
-
-// Mini "landing" del Área Estudiantes: presenta los 3 accesos (Registro,
-// Marcación, Administrador de Sección) como tarjetas, igual que el
-// prototipo original presentaba sus accesos principales en el Home.
-
 import React from 'react';
 
 const ACCESOS = [

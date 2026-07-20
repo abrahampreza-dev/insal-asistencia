@@ -1,10 +1,3 @@
-// src/components/GeneradorOtp.jsx
-// ---------------------------------------------------------------------------
-// Genera el código OTP diario de un grado y lo muestra en grande para que el
-// asistente/maestro se lo diga a los estudiantes. Sin vencimiento por
-// tiempo: el código sigue siendo válido hasta que se presiona "Guardar
-// Asistencia" (ver BotonGuardarAsistencia.jsx), que cierra el día.
-// ---------------------------------------------------------------------------
 import React, { useState, useEffect, useCallback } from 'react';
 import { llamarApi } from '../api';
 import { escucharRuta } from '../firebase';
@@ -12,19 +5,14 @@ import { CampoError } from './EstadoPeticion';
 
 function hoyISO() {
   const d = new Date();
-  // Forzamos el formato local de año, mes y día
   const año = d.getFullYear();
   const mes = String(d.getMonth() + 1).padStart(2, '0');
   const dia = String(d.getDate()).padStart(2, '0');
   return `${año}-${mes}-${dia}`;
 }
 
-/**
- * @param {string} grado
- * @param {{clave?: string, claveAdmin?: string, generadoPor?: string}} auth
- */
 export default function GeneradorOtp({ grado, auth }) {
-  const [otpInfo, setOtpInfo] = useState(null); // {codigo, generadoPor} | null
+  const [otpInfo, setOtpInfo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,8 +31,6 @@ export default function GeneradorOtp({ grado, auth }) {
     if (!resultado.ok) setError(resultado.error || 'No se pudo generar el código.');
   }, [grado, auth]);
 
-  // Compatibilidad: si en Firebase quedó un valor viejo guardado como texto
-  // plano (formato anterior), lo mostramos igual en vez de fallar en blanco.
   const codigo = otpInfo && typeof otpInfo === 'object' ? otpInfo.codigo : otpInfo;
 
   return (

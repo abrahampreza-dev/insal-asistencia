@@ -1,9 +1,3 @@
-// src/components/EstadoPeticion.jsx
-// ---------------------------------------------------------------------------
-// Primitivas visuales reutilizables para el renderizado condicional exigido
-// por la rúbrica: spinner de carga, tarjeta de éxito (verde) y alerta de
-// error (roja). Un único punto de estilo para toda la aplicación.
-// ---------------------------------------------------------------------------
 import React from 'react';
 
 export function Spinner({ texto = 'Cargando...' }) {

@@ -6,12 +6,10 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #020617; /* slate-950 */
-  color: #e2e8f0; /* slate-200 — evita que inputs/selects hereden negro por defecto */
+  background-color: #020617;
+  color: #e2e8f0;
 }
 
-/* El selector de fecha nativo (ícono de calendario) es negro por defecto;
-   se invierte para que se vea sobre fondo oscuro. */
 input[type='date']::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }

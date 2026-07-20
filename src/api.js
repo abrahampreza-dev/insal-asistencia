@@ -1,15 +1,5 @@
-// Capa única de acceso a la API REST (Google Apps Script). Toda escritura
-// mutable de la aplicación pasa por aquí vía fetch().
-
-
 const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL;
 
-/**
- * Llama a una acción del backend de Apps Script.
- * @param {string} action - nombre de la acción (ver Código.gs)
- * @param {object} payload - datos adicionales a enviar junto con `action`
- * @returns {Promise<{ok: boolean, mensaje?: string, error?: string, data?: any}>}
- */
 export async function llamarApi(action, payload = {}) {
   if (!APPS_SCRIPT_URL) {
     return { ok: false, error: 'VITE_APPS_SCRIPT_URL no está configurada.' };
@@ -20,7 +10,7 @@ export async function llamarApi(action, payload = {}) {
       method: 'POST',
       mode: 'cors',
       redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS en Apps Script
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action, ...payload }),
     });
 
