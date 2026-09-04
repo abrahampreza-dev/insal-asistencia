@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function CampoClave({ value, onChange, placeholder, onKeyDown, className = '', autoFocus = false }) {
+export default function CampoClave({ value, onChange, placeholder, onKeyDown, className = '', autoFocus = false, autoComplete = 'current-password' }) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -12,6 +12,8 @@ export default function CampoClave({ value, onChange, placeholder, onKeyDown, cl
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         autoFocus={autoFocus}
+        autoComplete={autoComplete}
+        aria-label={placeholder || 'Contraseña'}
         className={`w-full p-4 pr-12 bg-slate-800 rounded-xl border-none font-bold italic outline-none focus:ring-2 focus:ring-indigo-500 ${className}`}
       />
       <button

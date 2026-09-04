@@ -11,7 +11,7 @@ function hoyISO() {
   return `${año}-${mes}-${dia}`;
 }
 
-export default function GeneradorOtp({ grado, auth }) {
+export default function GeneradorOtp({ grado, materia, auth }) {
   const [otpInfo, setOtpInfo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
@@ -19,17 +19,17 @@ export default function GeneradorOtp({ grado, auth }) {
   const fecha = hoyISO();
 
   useEffect(() => {
-    if (!grado) return undefined;
-    return escucharRuta(`codigos_diarios/${fecha}/${grado}`, (data) => setOtpInfo(data || null));
-  }, [grado, fecha]);
+    if (!grado || !materia) return undefined;
+    return escucharRuta(`codigos_diarios/${fecha}/${grado}/${materia}`, (data) => setOtpInfo(data || null));
+  }, [grado, materia, fecha]);
 
   const generar = useCallback(async () => {
     setCargando(true);
     setError('');
-    const resultado = await llamarApi('generarOtp', { grado, ...auth });
+    const resultado = await llamarApi('generarOtp', { grado, materia, ...auth });
     setCargando(false);
     if (!resultado.ok) setError(resultado.error || 'No se pudo generar el código.');
-  }, [grado, auth]);
+  }, [grado, materia, auth]);
 
   const codigo = otpInfo && typeof otpInfo === 'object' ? otpInfo.codigo : otpInfo;
 

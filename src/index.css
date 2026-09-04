@@ -1,15 +1,391 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #020617;
-  color: #e2e8f0;
+/* ═══════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — VARIABLES SEMANTICAS
+   Tema oscuro (por defecto) y claro definidos con tokens.
+   ═══════════════════════════════════════════════════════════════ */
+@layer base {
+  :root {
+    /* --- Fondos --- */
+    --bg-body:            #020617;
+    --bg-sidebar:         #0f172a;
+    --bg-card:            #0f172a;
+    --bg-elevated:        #1e293b;
+    --bg-elevated-2:      #334155;
+    --bg-input:           #020617;
+    --bg-badge:           #1e293b;
+    --bg-header:          rgba(15, 23, 42, 0.85);
+    --bg-overlay:         rgba(2, 6, 23, 0.6);
+
+    /* --- Texto --- */
+    --text-base:          #f8fafc;
+    --text-primary:       #f1f5f9;
+    --text-secondary:     #cbd5e1;
+    --text-muted:         #94a3b8;
+    --text-faint:         #64748b;
+    --text-label:         #64748b;
+
+    /* --- Bordes --- */
+    --border:             rgba(255, 255, 255, 0.08);
+    --border-soft:        rgba(255, 255, 255, 0.05);
+    --border-input:       #334155;
+    --border-focus:       #6366f1;
+
+    /* --- Acento principal (indigo) --- */
+    --accent:             #6366f1;
+    --accent-hover:       #818cf8;
+    --accent-muted:       rgba(99, 102, 241, 0.12);
+    --accent-border:      rgba(99, 102, 241, 0.3);
+    --accent-glow:        rgba(99, 102, 241, 0.4);
+
+    /* --- Acento secundario (violet - admin) --- */
+    --accent-admin:       #8b5cf6;
+    --accent-admin-muted: rgba(139, 92, 246, 0.12);
+    --accent-admin-border:rgba(139, 92, 246, 0.3);
+
+    /* --- Acento terciario (emerald - exito/sesion) --- */
+    --accent-success:     #10b981;
+    --accent-success-muted: rgba(16, 185, 129, 0.12);
+
+    /* --- Sombras --- */
+    --shadow-card:        0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    --shadow-elevated:    0 20px 50px -15px rgba(0, 0, 0, 0.7);
+    --shadow-accent:      0 8px 24px -4px rgba(99, 102, 241, 0.4);
+
+    /* --- Scrollbar --- */
+    --scrollbar-track:    rgba(15, 23, 42, 0.6);
+    --scrollbar-thumb:    rgba(99, 102, 241, 0.35);
+    --scrollbar-thumb-hover: rgba(99, 102, 241, 0.7);
+
+    /* --- Wayground card --- */
+    --card-bg:            linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.7) 100%);
+    --card-border:        rgba(255, 255, 255, 0.07);
+    --card-border-hover:  rgba(99, 102, 241, 0.4);
+    --card-shadow-hover:  0 20px 40px -15px rgba(99, 102, 241, 0.2);
+  }
+
+  /* ─────────────────────────────────────────────
+     TEMA CLARO — Paleta azul-lavanda premium
+     ───────────────────────────────────────────── */
+  [data-tema="claro"],
+  .light {
+    /* --- Fondos --- */
+    --bg-body:            #f0f4ff;
+    --bg-sidebar:         #ffffff;
+    --bg-card:            #ffffff;
+    --bg-elevated:        #f0f4ff;
+    --bg-elevated-2:      #e4eaf7;
+    --bg-input:           #f8faff;
+    --bg-badge:           #eef1fb;
+    --bg-header:          rgba(255, 255, 255, 0.92);
+    --bg-overlay:         rgba(240, 244, 255, 0.7);
+
+    /* --- Texto --- */
+    --text-base:          #0f172a;
+    --text-primary:       #0f172a;
+    --text-secondary:     #1e293b;
+    --text-muted:         #475569;
+    --text-faint:         #64748b;
+    --text-label:         #64748b;
+
+    /* --- Bordes --- */
+    --border:             #dce3f5;
+    --border-soft:        #e8eef8;
+    --border-input:       #c7d2e8;
+    --border-focus:       #6366f1;
+
+    /* --- Acentos (mantienen color de marca en ambos temas) --- */
+    --accent:             #4f46e5;
+    --accent-hover:       #4338ca;
+    --accent-muted:       rgba(79, 70, 229, 0.09);
+    --accent-border:      rgba(79, 70, 229, 0.25);
+    --accent-glow:        rgba(79, 70, 229, 0.2);
+
+    --accent-admin:       #7c3aed;
+    --accent-admin-muted: rgba(124, 58, 237, 0.08);
+    --accent-admin-border:rgba(124, 58, 237, 0.2);
+
+    --accent-success:     #059669;
+    --accent-success-muted: rgba(5, 150, 105, 0.08);
+
+    /* --- Sombras --- */
+    --shadow-card:        0 4px 20px -4px rgba(79, 70, 229, 0.08), 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-elevated:    0 12px 40px -8px rgba(79, 70, 229, 0.15);
+    --shadow-accent:      0 6px 20px -4px rgba(79, 70, 229, 0.3);
+
+    /* --- Scrollbar --- */
+    --scrollbar-track:    #e8eef8;
+    --scrollbar-thumb:    rgba(99, 102, 241, 0.3);
+    --scrollbar-thumb-hover: rgba(99, 102, 241, 0.6);
+
+    /* --- Wayground card --- */
+    --card-bg:            linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240, 244, 255, 0.8) 100%);
+    --card-border:        #dce3f5;
+    --card-border-hover:  rgba(79, 70, 229, 0.3);
+    --card-shadow-hover:  0 12px 30px -8px rgba(79, 70, 229, 0.12);
+  }
+
+  /* --- Aplicacion de variables al body --- */
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-base);
+    overflow-x: hidden;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+
+  /* --- Normalizacion Global de inputs --- */
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  textarea {
+    text-transform: uppercase;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* --- Date Picker --- */
+  input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+  [data-tema="claro"] input[type='date']::-webkit-calendar-picker-indicator,
+  .light input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+  }
 }
 
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+/* ═══════════════════════════════════════════════════════════════
+   SOBRESCRITURA TAILWIND — variables semanticas globales
+   Transicion suave (0.3s) en cambios de tema.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Fondos --- */
+.bg-slate-950  { background-color: var(--bg-body) !important; }
+.bg-slate-900  { background-color: var(--bg-card) !important; }
+.bg-slate-800  { background-color: var(--bg-elevated) !important; }
+.bg-slate-700  { background-color: var(--bg-elevated-2) !important; }
+.bg-slate-400  { background-color: var(--text-muted) !important; }
+
+/* --- Texto --- */
+.text-slate-100 { color: var(--text-primary) !important; }
+.text-slate-200 { color: var(--text-secondary) !important; }
+.text-slate-300 { color: var(--text-muted) !important; }
+.text-slate-400 { color: var(--text-faint) !important; }
+.text-slate-500 { color: var(--text-label) !important; }
+
+/* --- Bordes --- */
+.border-slate-800 { border-color: var(--border) !important; }
+.border-slate-700 { border-color: var(--border-soft) !important; }
+
+/* --- Hover --- */
+.hover\:bg-slate-800:hover { background-color: var(--bg-elevated) !important; }
+.hover\:bg-slate-700:hover { background-color: var(--bg-elevated-2) !important; }
+.hover\:text-slate-200:hover { color: var(--text-secondary) !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODO CLARO — Ajustes especificos por tipo de elemento
+   ═══════════════════════════════════════════════════════════════ */
+
+/* --- Sidebar --- */
+[data-tema="claro"] aside,
+.light aside {
+  background-color: #ffffff !important;
+  border-color: #dce3f5 !important;
+  box-shadow: 4px 0 24px rgba(79, 70, 229, 0.07) !important;
+}
+
+/* --- Header --- */
+[data-tema="claro"] header,
+.light header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #dce3f5 !important;
+  box-shadow: 0 1px 16px rgba(79, 70, 229, 0.07) !important;
+}
+
+/* --- Inputs, textareas, selects --- */
+[data-tema="claro"] input,
+[data-tema="claro"] textarea,
+[data-tema="claro"] select,
+.light input,
+.light textarea,
+.light select {
+  background-color: #f8faff !important;
+  border-color: #c7d2e8 !important;
+  color: #0f172a !important;
+}
+
+[data-tema="claro"] input::placeholder,
+[data-tema="claro"] textarea::placeholder,
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-tema="claro"] input:focus,
+[data-tema="claro"] textarea:focus,
+[data-tema="claro"] select:focus,
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+  outline: none !important;
+}
+
+/* --- Chips con opacidad (header) --- */
+[data-tema="claro"] .bg-slate-950\/60,
+.light .bg-slate-950\/60,
+[data-tema="claro"] .bg-slate-950\/80,
+.light .bg-slate-950\/80 {
+  background-color: #f0f4ff !important;
+}
+
+/* --- Fondos con opacidad de paneles --- */
+[data-tema="claro"] [class*="bg-slate-900\/"],
+.light [class*="bg-slate-900\/"] {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+[data-tema="claro"] [class*="bg-slate-950\/"],
+.light [class*="bg-slate-950\/"] {
+  background-color: rgba(240, 244, 255, 0.88) !important;
+}
+[data-tema="claro"] [class*="bg-slate-800\/"],
+.light [class*="bg-slate-800\/"] {
+  background-color: rgba(228, 234, 247, 0.7) !important;
+}
+
+/* --- Gradientes de encabezados (ViewAdmin, ViewDocente) --- */
+[data-tema="claro"] [style*="linear-gradient(135deg, #1a0a2e"],
+.light [style*="linear-gradient(135deg, #1a0a2e"] {
+  background: linear-gradient(135deg, #ede9ff 0%, #f0f4ff 100%) !important;
+}
+[data-tema="claro"] [style*="background: 'linear-gradient(135deg, #1a0a2e"],
+.light [style*="background: 'linear-gradient(135deg, #1a0a2e"] {
+  background: linear-gradient(135deg, #ede9ff 0%, #f0f4ff 100%) !important;
+}
+
+/* --- Anillo del avatar en modo claro --- */
+[data-tema="claro"] .ring-slate-900,
+.light .ring-slate-900 {
+  --tw-ring-color: #ffffff !important;
+}
+
+/* --- Botones deshabilitados --- */
+[data-tema="claro"] button:disabled,
+.light button:disabled {
+  opacity: 0.45 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TRANSICION GLOBAL DE TEMA (suave y fluida)
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* Desactivar transicion en animaciones de movimiento/transform */
+.animate-pulse,
+.animate-spin,
+.animate-bounce,
+[class*="animate-"],
+[class*="transition-"],
+[class*="duration-"] {
+  transition-property: background-color, border-color, color, box-shadow;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENTES
+   ═══════════════════════════════════════════════════════════════ */
+@layer components {
+  .wayground-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .wayground-card:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .wayground-glow-emerald { box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4); }
+  .wayground-glow-indigo  { box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.4); }
+  .wayground-glow-amber   { box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.4); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMACIONES
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes confeti-caida {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(105vh) rotate(720deg) scale(0.3); opacity: 0; }
+}
+.animate-confeti { animation: confeti-caida linear forwards; }
+
+@keyframes bounce-short {
+  0%   { transform: translateX(100%); opacity: 0; }
+  60%  { transform: translateX(-6px); opacity: 1; }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+.animate-bounce-short { animation: bounce-short 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.05); }
+}
+.animate-pulse-glow { animation: pulse-glow 3s infinite ease-in-out; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ESTILOS DE IMPRESION
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  aside, button, nav, .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  main * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main .bg-slate-900,
+  main .wayground-card,
+  main [class*="bg-slate-8"],
+  main [class*="bg-slate-9"] {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  main * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
 }

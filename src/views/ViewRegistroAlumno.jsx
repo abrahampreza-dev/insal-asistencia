@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { llamarApi } from '../api';
 import { comprimirFoto } from '../utils/comprimirFoto';
 import { validarNie, validarTexto, validarEmail, validarFecha, validarSeleccion } from '../utils/validators';
@@ -136,13 +137,33 @@ export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '',
   }
 
   return (
-    <div className="max-w-lg mx-auto bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-sm">
-      <img src={logo} alt="INSAL" className="w-16 h-16 object-contain mx-auto mb-4" />
-      <h3 className="text-center text-xs font-black uppercase text-indigo-400 italic tracking-widest mb-8">
-        Registro de Alumno
-      </h3>
+    <motion.div
+      className="max-w-lg mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      <motion.div
+        className="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-sm"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <img src={logo} alt="INSAL" className="w-16 h-16 object-contain mx-auto mb-4" />
+        <motion.h3
+          className="text-center text-xs font-black uppercase text-indigo-400 italic tracking-widest mb-8"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          Registro de Alumno
+        </motion.h3>
 
-      <form onSubmit={manejarSubmit} className="space-y-5" noValidate>
+        <motion.form onSubmit={manejarSubmit} className="space-y-5" noValidate
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+        >
         <div className="flex flex-col items-center mb-2">
           <div className="w-28 h-28 rounded-3xl bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center overflow-hidden mb-3">
             {foto ? (
@@ -227,15 +248,18 @@ export default function ViewRegistroAlumno({ nieInicial = '', gradoInicial = '',
         {estado === 'cargando' && <Spinner texto="Guardando alumno..." />}
         <AlertaError mensaje={mensajeError} />
 
-        <button
+        <motion.button
           type="submit"
           disabled={estado === 'cargando'}
           className="w-full bg-indigo-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
         >
           Registrar Alumno
-        </button>
-      </form>
-    </div>
+        </motion.button>
+      </motion.form>
+      </motion.div>
+    </motion.div>
   );
 }
 

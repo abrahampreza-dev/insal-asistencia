@@ -1,0 +1,21 @@
+export { generarPreguntasIA, calificarRespuestaAbierta, calificarRespuestasAbiertasLote, generarAdvertencia } from './geminiService';
+export {
+  crearExamen,
+  guardarExamenBorrador,
+  publicarExamen,
+  obtenerExamen,
+  listarExamenes,
+  eliminarExamen,
+  iniciarExamen,
+  guardarRespuesta,
+  guardarBorradorRespuestas,
+  registrarEventoProctoring,
+  actualizarStatusProctoring,
+  escucharProctoring,
+  escucharRespuesta,
+  finalizarExamen,
+  validarRespuestaAutomatica,
+  calificarRespuestaAbierta as calificarAbiertaServicio,
+  obtenerRespuestasExamen,
+  calcularCalificacionesExamen,
+} from './examService';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { llamarApi } from '../api';
 import { Spinner, AlertaError, TarjetaExito } from './EstadoPeticion';
 
-export default function BotonGuardarAsistencia({ grado, auth, pendientes = [] }) {
+export default function BotonGuardarAsistencia({ grado, materia, auth, pendientes = [] }) {
   const [cargando, setCargando] = useState(false);
   const [estado, setEstado] = useState('idle');
   const [mensaje, setMensaje] = useState('');
@@ -11,7 +11,7 @@ export default function BotonGuardarAsistencia({ grado, auth, pendientes = [] })
   async function guardar() {
     setCargando(true);
     setEstado('idle');
-    const resultado = await llamarApi('congelarReporte', { grado, ...auth });
+    const resultado = await llamarApi('congelarReporte', { grado, materia, ...auth });
     setCargando(false);
     setConfirmar(false);
 
@@ -28,6 +28,8 @@ export default function BotonGuardarAsistencia({ grado, auth, pendientes = [] })
     return <TarjetaExito titulo="Asistencia guardada" mensaje={mensaje} />;
   }
 
+  // Regla de negocio: TODO alumno debe tener P, A o M antes de guardar.
+  // Mientras haya pendientes se muestra el aviso en lugar del botón.
   if (pendientes.length > 0) {
     return (
       <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 max-w-xs">
@@ -56,7 +58,7 @@ export default function BotonGuardarAsistencia({ grado, auth, pendientes = [] })
       ) : (
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 space-y-3 max-w-xs">
           <p className="text-[10px] font-bold italic text-emerald-300 text-center">
-            Esto cierra la asistencia de {grado} de hoy. El código dejará de servir y no se podrán hacer más correcciones. ¿Confirmas?
+            Esto cierra la asistencia de {grado}{materia ? ` (${materia})` : ''} de hoy. El código dejará de servir y no se podrán hacer más correcciones. ¿Confirmas?
           </p>
           <div className="flex gap-2">
             <button onClick={() => setConfirmar(false)} className="flex-1 p-2 text-[10px] font-bold text-slate-400 uppercase">Cancelar</button>
